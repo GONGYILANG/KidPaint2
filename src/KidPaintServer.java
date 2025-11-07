@@ -53,6 +53,10 @@ public class KidPaintServer {
                 case 2:
                     readText(in, thread.getUserName());
                     break;
+                case 3:
+                    readSize(in);
+                    sendInitialPixels();
+                    break;
             }
 
         }
@@ -101,7 +105,8 @@ public class KidPaintServer {
             int y = in.readInt();
             points.add(new Point(x, y));
             System.out.printf("%d --> %d, %d\n", color, x, y);
-            //update local data
+            // update local data
+            data[y][x] = color;
         }
 
         sendPixels(color, points);
@@ -123,6 +128,33 @@ public class KidPaintServer {
                     System.out.println("One connection is dropped!");
                 }
 
+            }
+        }
+    }
+
+    void readSize(DataInputStream in) throws IOException {
+        int numPixels = in.readInt();
+        if(data == null)
+            data = new int[numPixels][numPixels];
+    }
+
+    void sendInitialPixels() {
+        synchronized (clientList) {
+            for (DataOutputStream out: clientList.values()) {
+                try {
+                    for(int i = 0;i<data.length;i++) {
+                        for(int j = 0;j<data[0].length;j++) {
+                            // if(data[i][j]==0) continue; // skip white pixels
+                            out.write(1);
+                            out.writeInt(data[i][j]);
+                            out.writeInt(1); // size = 1
+                            out.writeInt(j);
+                            out.writeInt(i);
+                        }
+                    }
+                } catch(IOException e) {
+                    System.out.println("One connection is dropped!");
+                }
             }
         }
     }

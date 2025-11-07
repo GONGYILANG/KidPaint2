@@ -30,6 +30,7 @@ public class MainWindow {
     final int NAME = 0;
     final int PIXELS = 1;
     final int TEXT = 2;
+    final int PIXEL_SIZE = 3;
 
     Socket socket;
     DataInputStream in;
@@ -84,9 +85,13 @@ public class MainWindow {
         in = new DataInputStream(socket.getInputStream());
         out = new DataOutputStream(socket.getOutputStream());
 
-        out.write(NAME); //sending 0 means th following data is the username
+        out.write(NAME); // sending 0 means th following data is the username
         out.writeInt(username.length());
         out.write(username.getBytes());
+        out.flush();
+
+        out.write(PIXEL_SIZE);  // sending 3 means the following data is the pixel size
+        out.writeInt(numPixels);
         out.flush();
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("mainWindownUI.fxml"));
